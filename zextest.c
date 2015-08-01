@@ -101,7 +101,7 @@ void SystemCall (Z80_STATE *state)
 
         else if (state->registers.byte[Z80_C] == 9) {
 
-                int     i, c;
+                int16_t     i, c;
 
                 for (i = state->registers.word[Z80_DE], c = 0; 
                         memory[i] != '$';

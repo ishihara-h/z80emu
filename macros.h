@@ -111,7 +111,7 @@
                                                                         \
         } else {                                                        \
                                                                         \
-                int     d;                                              \
+                int16_t     d;                                              \
                                                                         \
                 READ_D(d);                                              \
                 d += HL_IX_IY;                                          \
@@ -130,7 +130,7 @@
                                                                         \
         } else {                                                        \
                                                                         \
-                int     d;                                              \
+                int16_t     d;                                              \
                                                                         \
                 READ_D(d);                                              \
                 d += HL_IX_IY;                                          \
@@ -159,7 +159,7 @@
 
 #define EXCHANGE(a, b)                                                  \
 {                                                                       \
-        int     t;                                                      \
+        int16_t     t;                                                      \
                                                                         \
         t = (a);                                                        \
         (a) = (b);                                                      \
@@ -170,7 +170,7 @@
 
 #define ADD(x)                                                          \
 {                                                                       \
-        int     a, z, c, f;                                             \
+        int16_t     a, z, c, f;                                             \
                                                                         \
         a = A;                                                          \
         z = a + (x);                                                    \
@@ -187,7 +187,7 @@
 
 #define ADC(x)                                                          \
 {                                                                       \
-        int     a, z, c, f;                                             \
+        int16_t     a, z, c, f;                                             \
                                                                         \
         a = A;                                                          \
         z = a + (x) + (F & Z80_C_FLAG);                                 \
@@ -204,7 +204,7 @@
 
 #define SUB(x)                                                          \
 {                                                                       \
-        int     a, z, c, f;                                             \
+        int16_t     a, z, c, f;                                             \
                                                                         \
         a = A;                                                          \
         z = a - (x);                                                    \
@@ -222,7 +222,7 @@
 
 #define SBC(x)                                                          \
 {                                                                       \
-        int     a, z, c, f;                                             \
+        int16_t     a, z, c, f;                                             \
                                                                         \
         a = A;                                                          \
         z = a - (x) - (F & Z80_C_FLAG);                                 \
@@ -255,7 +255,7 @@
          
 #define CP(x)                                                           \
 {                                                                       \
-        int     a, z, c, f;                                             \
+        int16_t     a, z, c, f;                                             \
                                                                         \
         a = A;                                                          \
         z = a - (x);                                                    \
@@ -273,7 +273,7 @@
 
 #define INC(x)                                                          \
 {                                                                       \
-        int     z, c, f;                                                \
+        int16_t     z, c, f;                                                \
                                                                         \
         z = (x) + 1;                                                    \
         c = (x) ^ z;                                                    \
@@ -289,7 +289,7 @@
 
 #define DEC(x)                                                          \
 {                                                                       \
-        int     z, c, f;                                                \
+        int16_t     z, c, f;                                                \
                                                                         \
         z = (x) - 1;                                                    \
         c = (x) ^ z;                                                    \
@@ -307,7 +307,7 @@
 
 #define RLC(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) >> 7;                                                   \
         (x) = ((x) << 1) | c;                                           \
@@ -316,7 +316,7 @@
 
 #define RL(x)                                                           \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) >> 7;                                                   \
         (x) = ((x) << 1) | (F & Z80_C_FLAG);                            \
@@ -325,7 +325,7 @@
 
 #define RRC(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) & 0x01;                                                 \
         (x) = ((x) >> 1) | (c << 7);                                    \
@@ -334,7 +334,7 @@
 
 #define RR_INSTRUCTION(x)                                               \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) & 0x01;                                                 \
         (x) = ((x) >> 1) | ((F & Z80_C_FLAG) << 7);                     \
@@ -343,7 +343,7 @@
 
 #define SLA(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) >> 7;                                                   \
         (x) <<= 1;                                                      \
@@ -352,7 +352,7 @@
 
 #define SLL(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) >> 7;                                                   \
         (x) = ((x) << 1) | 0x01;                                        \
@@ -361,7 +361,7 @@
 
 #define SRA(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) & 0x01;                                                 \
         (x) = ((char) (x)) >> 1;                                        \
@@ -370,7 +370,7 @@
         
 #define SRL(x)                                                          \
 {                                                                       \
-        int     c;                                                      \
+        int16_t     c;                                                      \
                                                                         \
         c = (x) & 0x01;                                                 \
         (x) >>= 1;                                                      \

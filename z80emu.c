@@ -22,7 +22,7 @@
  * negated conditions, it is used along with the and table.
  */
 
-static const int XOR_CONDITION_TABLE[8] = {
+static const uint8_t XOR_CONDITION_TABLE[8] = {
 
         Z80_Z_FLAG,
         0,
@@ -35,7 +35,7 @@ static const int XOR_CONDITION_TABLE[8] = {
 
 };
 
-static const int AND_CONDITION_TABLE[8] = {
+static const uint8_t AND_CONDITION_TABLE[8] = {
 
         Z80_Z_FLAG,
         Z80_Z_FLAG,
@@ -50,7 +50,7 @@ static const int AND_CONDITION_TABLE[8] = {
 
 /* RST instruction restart addresses, encoded by Y() bits of the opcode. */
 
-static const int RST_TABLE[8] = {
+static const uint8_t RST_TABLE[8] = {
 
         0x00,
         0x08,
@@ -67,7 +67,7 @@ static const int RST_TABLE[8] = {
  * significant bit is not zero.
  */
 
-static const int        OVERFLOW_TABLE[4] = {
+static const uint8_t        OVERFLOW_TABLE[4] = {
                         
                                 0,
                                 Z80_V_FLAG,
@@ -76,7 +76,7 @@ static const int        OVERFLOW_TABLE[4] = {
 
                         };
 
-static int      emulate (Z80_STATE * state, int number_cycles, int opcode);
+static uint32_t      emulate (Z80_STATE * state, uint32_t number_cycles, int16_t opcode);
                                         
 /* Reset processor's state to power-on default and reset status. */
 
@@ -95,7 +95,7 @@ void Z80Reset (Z80_STATE *state)
  * data_on_bus must be a single byte opcode.
  */
 
-int Z80Interrupt (Z80_STATE *state, int data_on_bus)
+uint8_t Z80Interrupt (Z80_STATE *state, int16_t data_on_bus)
 {
         state->status = 0;
         if (state->iff1) {
@@ -148,7 +148,7 @@ int Z80Interrupt (Z80_STATE *state, int data_on_bus)
  * accept it. Z80_STATE's status is reset.
  */
 
-int Z80NonMaskableInterrupt (Z80_STATE *state)
+uint8_t Z80NonMaskableInterrupt (Z80_STATE *state)
 {
         state->status = 0;
 
@@ -171,9 +171,9 @@ int Z80NonMaskableInterrupt (Z80_STATE *state)
  * indicate the reason why.
  */
 
-int Z80Emulate (Z80_STATE *state, int number_cycles)
+uint32_t Z80Emulate (Z80_STATE *state, uint32_t number_cycles)
 {
-        int     opcode;
+        int16_t     opcode;
 
         Z80_FETCH_BYTE(state->pc, opcode);
         state->pc++;
@@ -187,11 +187,11 @@ int Z80Emulate (Z80_STATE *state, int number_cycles)
  * needed by Z80Interrupt() for interrupt mode 0.
  */
 
-static int emulate (Z80_STATE * state, int number_cycles, int opcode)
+static uint32_t emulate (Z80_STATE * state, uint32_t number_cycles, int16_t opcode)
 
 {
-        int     elapsed_cycles, 
-                pc, r, 
+        uint32_t     elapsed_cycles; 
+        uint16_t        pc, r, 
                 i;
         void    *register_table[16], 
                 *dd_register_table[16], 
@@ -265,7 +265,7 @@ static int emulate (Z80_STATE * state, int number_cycles, int opcode)
         for ( ; ; ) {   
 
                 void    **registers; 
-                int     instruction;
+                int16_t     instruction;
 
                 Z80_FETCH_BYTE(pc, opcode);
                 pc++;
@@ -308,7 +308,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         READ_D(d);
                                         d += HL_IX_IY;
@@ -329,7 +329,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         READ_D(d);
                                         d += HL_IX_IY;
@@ -344,7 +344,7 @@ emulate_next_instruction:
 
                         case LD_INDIRECT_HL_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 if (registers == register_table) {
 
@@ -353,7 +353,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         READ_D(d);
                                         d += HL_IX_IY;
@@ -384,7 +384,7 @@ emulate_next_instruction:
 
                         case LD_A_INDIRECT_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 READ_BYTE(nn, A);
@@ -409,7 +409,7 @@ emulate_next_instruction:
 
                         case LD_INDIRECT_NN_A: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 WRITE_BYTE(nn, A);
@@ -420,7 +420,7 @@ emulate_next_instruction:
 
                         case LD_A_I_LD_A_R: {
 
-                                int     a, f;
+                                int16_t     a, f;
 
                                 a = opcode == OPCODE_LD_A_I 
                                         ? state->i 
@@ -474,7 +474,7 @@ emulate_next_instruction:
 
                         case LD_HL_INDIRECT_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 READ_WORD(nn, HL_IX_IY);
@@ -485,7 +485,7 @@ emulate_next_instruction:
 
                         case LD_RR_INDIRECT_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 READ_WORD(nn, RR(P(opcode)));
@@ -496,7 +496,7 @@ emulate_next_instruction:
 
                         case LD_INDIRECT_NN_HL: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 WRITE_WORD(nn, HL_IX_IY);
@@ -507,7 +507,7 @@ emulate_next_instruction:
 
                         case LD_INDIRECT_NN_RR: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 WRITE_WORD(nn, RR(P(opcode)));
@@ -566,7 +566,7 @@ emulate_next_instruction:
 
                         case EX_INDIRECT_SP_HL: {
 
-                                int     t;
+                                int16_t     t;
 
                                 READ_WORD(SP, t);
                                 WRITE_WORD(SP, HL_IX_IY);
@@ -579,7 +579,7 @@ emulate_next_instruction:
 
                         case LDI_LDD: {
 
-                                int     n, f, d;
+                                int16_t     n, f, d;
 
                                 READ_BYTE(HL, n);
                                 WRITE_BYTE(DE, n);
@@ -610,11 +610,11 @@ emulate_next_instruction:
 
                         case LDIR_LDDR: {
 
-                                int     d, f, bc, de, hl, n;
+                                int16_t     d, f, bc, de, hl, n;
                                 
 #ifdef Z80_HANDLE_SELF_MODIFYING_CODE
 
-                                int     p, q;
+                                int16_t     p, q;
 
                                 p = (pc - 2) & 0xffff;
                                 q = (pc - 1) & 0xffff;
@@ -699,7 +699,7 @@ emulate_next_instruction:
 
                         case CPI_CPD: {
 
-                                int     a, n, z, f;
+                                int16_t     a, n, z, f;
 
                                 a = A;
                                 READ_BYTE(HL, n);
@@ -730,7 +730,7 @@ emulate_next_instruction:
 
                         case CPIR_CPDR: {
                                         
-                                int     d, a, bc, hl, n, z, f;
+                                int16_t     d, a, bc, hl, n, z, f;
 
                                 d = opcode == OPCODE_CPIR ? +1 : -1;
 
@@ -806,7 +806,7 @@ emulate_next_instruction:
 
                         case ADD_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 ADD(n);
@@ -817,7 +817,7 @@ emulate_next_instruction:
 
                         case ADD_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 ADD(x);
@@ -835,7 +835,7 @@ emulate_next_instruction:
 
                         case ADC_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 ADC(n);
@@ -846,7 +846,7 @@ emulate_next_instruction:
 
                         case ADC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 ADC(x);
@@ -864,7 +864,7 @@ emulate_next_instruction:
 
                         case SUB_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 SUB(n);
@@ -875,7 +875,7 @@ emulate_next_instruction:
 
                         case SUB_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 SUB(x);
@@ -893,7 +893,7 @@ emulate_next_instruction:
 
                         case SBC_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 SBC(n);
@@ -904,7 +904,7 @@ emulate_next_instruction:
 
                         case SBC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 SBC(x);
@@ -922,7 +922,7 @@ emulate_next_instruction:
 
                         case AND_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 AND(n);
@@ -933,7 +933,7 @@ emulate_next_instruction:
 
                         case AND_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 AND(x);
@@ -951,7 +951,7 @@ emulate_next_instruction:
 
                         case OR_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 OR(n);
@@ -962,7 +962,7 @@ emulate_next_instruction:
 
                         case OR_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 OR(x);
@@ -980,7 +980,7 @@ emulate_next_instruction:
 
                         case XOR_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 XOR(n);
@@ -991,7 +991,7 @@ emulate_next_instruction:
 
                         case XOR_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 XOR(x);
@@ -1009,7 +1009,7 @@ emulate_next_instruction:
 
                         case CP_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 CP(n);
@@ -1020,7 +1020,7 @@ emulate_next_instruction:
 
                         case CP_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 READ_INDIRECT_HL(x);
                                 CP(x);
@@ -1038,7 +1038,7 @@ emulate_next_instruction:
 
                         case INC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1050,7 +1050,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         READ_D(d);
                                         d += HL_IX_IY;
@@ -1075,7 +1075,7 @@ emulate_next_instruction:
 
                         case DEC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1087,7 +1087,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         READ_D(d);
                                         d += HL_IX_IY;
@@ -1107,7 +1107,7 @@ emulate_next_instruction:
 
                         case DAA: {
                         
-                                int     a, c, d;
+                                int16_t     a, c, d;
 
                                 /* The following algorithm is from
                                  * comp.sys.sinclair's FAQ. 
@@ -1157,7 +1157,7 @@ emulate_next_instruction:
 
                         case NEG: {
 
-                                int     a, f, z, c;
+                                int16_t     a, f, z, c;
 
                                 a = A;
                                 z = -a;
@@ -1178,7 +1178,7 @@ emulate_next_instruction:
 
                         case CCF: {
 
-                                int     c;
+                                int16_t     c;
 
                                 c = F & Z80_C_FLAG;
                                 F = (F & SZPV_FLAGS)
@@ -1311,7 +1311,8 @@ emulate_next_instruction:
 
                         case ADD_HL_RR: {
 
-                                int     x, y, z, f, c;
+                                uint16_t     x, y, f;
+                                int32_t     z, c;
 
                                 x = HL_IX_IY;
                                 y = RR(P(opcode));
@@ -1340,11 +1341,12 @@ emulate_next_instruction:
 
                         case ADC_HL_RR: {
 
-                                int     x, y, z, f, c;
+                                uint16_t     x, y, f;
+                                int32_t     c, z;
                         
                                 x = HL;
                                 y = RR(P(opcode));
-                                z = x + y + (F & Z80_C_FLAG);
+                                z = (int32_t)x + y + (F & Z80_C_FLAG);
 
                                 c = x ^ y ^ z;
                                 f = z & 0xffff
@@ -1371,11 +1373,12 @@ emulate_next_instruction:
 
                         case SBC_HL_RR: {
 
-                                int     x, y, z, f, c;
+                                uint16_t     x, y, f;
+                                int32_t     z, c;
                         
                                 x = HL;
                                 y = RR(P(opcode));
-                                z = x - y - (F & Z80_C_FLAG);
+                                z = (int32_t)x - y - (F & Z80_C_FLAG);
 
                                 c = x ^ y ^ z;
                                 f = Z80_N_FLAG;
@@ -1404,7 +1407,7 @@ emulate_next_instruction:
 
                         case INC_RR: {
 
-                                int     x;
+                                int16_t     x;
 
                                 x = RR(P(opcode));
                                 x++;
@@ -1418,7 +1421,7 @@ emulate_next_instruction:
 
                         case DEC_RR: {
 
-                                int     x;
+                                int16_t     x;
 
                                 x = RR(P(opcode));
                                 x--;
@@ -1443,7 +1446,7 @@ emulate_next_instruction:
 
                         case RLA: {
 
-                                int     a, f;
+                                int16_t     a, f;
 
                                 a = A << 1;
                                 f = (F & SZPV_FLAGS)
@@ -1464,7 +1467,7 @@ emulate_next_instruction:
 
                         case RRCA: {
 
-                                int     c;
+                                int16_t     c;
 
                                 c = A & 0x01;
                                 A = (A >> 1) | (A << 7);
@@ -1484,7 +1487,7 @@ emulate_next_instruction:
 
                         case RRA: {
 
-                                int     c;
+                                int16_t     c;
 
                                 c = A & 0x01;
                                 A = (A >> 1) | ((F & Z80_C_FLAG) << 7);
@@ -1511,7 +1514,7 @@ emulate_next_instruction:
 
                         case RLC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1523,7 +1526,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1555,7 +1558,7 @@ emulate_next_instruction:
 
                         case RL_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1567,7 +1570,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1599,7 +1602,7 @@ emulate_next_instruction:
 
                         case RRC_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1611,7 +1614,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1643,7 +1646,7 @@ emulate_next_instruction:
 
                         case RR_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1655,7 +1658,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1687,7 +1690,7 @@ emulate_next_instruction:
 
                         case SLA_INDIRECT_HL: {
 
-                                int     x;      
+                                int16_t     x;      
 
                                 if (registers == register_table) {
 
@@ -1699,7 +1702,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1731,7 +1734,7 @@ emulate_next_instruction:
 
                         case SLL_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1743,7 +1746,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1775,7 +1778,7 @@ emulate_next_instruction:
 
                         case SRA_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1787,7 +1790,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1819,7 +1822,7 @@ emulate_next_instruction:
 
                         case SRL_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1831,7 +1834,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1856,7 +1859,7 @@ emulate_next_instruction:
 
                         case RLD_RRD: {
 
-                                int     x, y;
+                                uint16_t     x, y;
 
                                 READ_BYTE(HL, x);
                                 y = (A & 0xf0) << 8;
@@ -1881,7 +1884,7 @@ emulate_next_instruction:
 
                         case BIT_B_R: {
 
-                                int     x;
+                                int16_t     x;
 
                                 x = R(Z(opcode)) & (1 << Y(opcode));
                                 F = (x ? 0 : Z80_Z_FLAG | Z80_P_FLAG)
@@ -1902,7 +1905,7 @@ emulate_next_instruction:
 
                         case BIT_B_INDIRECT_HL: {
 
-                                int     d, x;
+                                int16_t     d, x;
                                         
                                 if (registers == register_table) {
 
@@ -1948,7 +1951,7 @@ emulate_next_instruction:
 
                         case SET_B_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -1960,7 +1963,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -1992,7 +1995,7 @@ emulate_next_instruction:
 
                         case RES_B_INDIRECT_HL: {
 
-                                int     x;
+                                int16_t     x;
 
                                 if (registers == register_table) {
 
@@ -2004,7 +2007,7 @@ emulate_next_instruction:
 
                                 } else {
 
-                                        int     d;
+                                        int16_t     d;
 
                                         Z80_FETCH_BYTE(pc, d);
                                         d = ((char) d) + HL_IX_IY;
@@ -2031,7 +2034,7 @@ emulate_next_instruction:
 
                         case JP_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 Z80_FETCH_WORD(pc, nn);
                                 pc = nn;
@@ -2044,7 +2047,7 @@ emulate_next_instruction:
 
                         case JP_CC_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 if (CC(Y(opcode))) {
 
@@ -2070,7 +2073,7 @@ emulate_next_instruction:
 
                         case JR_E: {
 
-                                int     e;
+                                int16_t     e;
                                 
                                 Z80_FETCH_BYTE(pc, e);
                                 e = (char) e;
@@ -2084,7 +2087,7 @@ emulate_next_instruction:
 
                         case JR_DD_E: {
 
-                                int     e;
+                                int16_t     e;
 
                                 if (DD(Q(opcode))) {
                                 
@@ -2120,7 +2123,7 @@ emulate_next_instruction:
 
                         case DJNZ_E: {
 
-                                int     e;
+                                int16_t     e;
                                 
                                 if (--B) {
                                 
@@ -2152,7 +2155,7 @@ emulate_next_instruction:
 
                         case CALL_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 READ_NN(nn);
                                 PUSH(pc);
@@ -2166,7 +2169,7 @@ emulate_next_instruction:
 
                         case CALL_CC_NN: {
 
-                                int     nn;
+                                int16_t     nn;
 
                                 if (CC(Y(opcode))) {
 
@@ -2256,7 +2259,7 @@ emulate_next_instruction:
 
                         case IN_A_N: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 Z80_INPUT_BYTE(n, A);
@@ -2269,7 +2272,7 @@ emulate_next_instruction:
 
                         case IN_R_C: {
 
-                                int     x;                                           
+                                int16_t     x;                                           
                                 Z80_INPUT_BYTE(C, x);
                                 if (Y(opcode) != INDIRECT_HL) 
 
@@ -2292,7 +2295,7 @@ emulate_next_instruction:
 
                         case INI_IND: {
 
-                                int     x, f;
+                                int16_t     x, f;
 
                                 Z80_INPUT_BYTE(C, x);
                                 WRITE_BYTE(HL, x);
@@ -2323,11 +2326,11 @@ emulate_next_instruction:
 
                         case INIR_INDR: {
 
-                                int     d, b, hl, x, f;
+                                int16_t     d, b, hl, x, f;
 
 #ifdef Z80_HANDLE_SELF_MODIFYING_CODE
 
-                                int     p, q;
+                                int16_t     p, q;
 
                                 p = (pc - 2) & 0xffff;
                                 q = (pc - 1) & 0xffff;
@@ -2405,7 +2408,7 @@ emulate_next_instruction:
 
                         case OUT_N_A: {
 
-                                int     n;
+                                int16_t     n;
 
                                 READ_N(n);
                                 Z80_OUTPUT_BYTE(n, A);
@@ -2418,7 +2421,7 @@ emulate_next_instruction:
 
                         case OUT_C_R: {
 
-                                int     x;
+                                int16_t     x;
 
                                 x = Y(opcode) != INDIRECT_HL
                                         ? R(Y(opcode))
@@ -2433,7 +2436,7 @@ emulate_next_instruction:
 
                         case OUTI_OUTD: {
 
-                                int     x, f;
+                                int16_t     x, f;
 
                                 READ_BYTE(HL, x);
                                 Z80_OUTPUT_BYTE(C, x);
@@ -2454,7 +2457,7 @@ emulate_next_instruction:
 
                         case OTIR_OTDR: {
 
-                                int     d, b, hl, x, f;
+                                int16_t     d, b, hl, x, f;
 
                                 d = opcode == OPCODE_OTIR ? +1 : -1;
 

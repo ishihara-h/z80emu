@@ -8,6 +8,8 @@
 
 #ifndef __Z80_INCLUDED__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -174,7 +176,7 @@ enum {
 
 typedef struct {
 
-        int             status;
+        int16_t             status;
                                 
         union {
                                 
@@ -185,7 +187,7 @@ typedef struct {
 
         unsigned short  alternates[4];
 
-        int             i, r, pc, iff1, iff2, im;
+        uint16_t             i, r, pc, iff1, iff2, im;
 
 } Z80_STATE;
 
@@ -292,10 +294,10 @@ typedef struct {
 
 extern void     Z80Reset (Z80_STATE *state);
 
-extern int      Z80Interrupt (Z80_STATE *state, int data_on_bus);
-extern int      Z80NonMaskableInterrupt (Z80_STATE *state);
+extern uint8_t      Z80Interrupt (Z80_STATE *state, int16_t data_on_bus);
+extern uint8_t      Z80NonMaskableInterrupt (Z80_STATE *state);
  
-extern int      Z80Emulate (Z80_STATE *state, int number_cycles);
+extern uint32_t      Z80Emulate (Z80_STATE *state, uint32_t number_cycles);
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@
 
 /* Additional Z80_STATE status flag to request emulation termination. */
                                 
-#define FLAG_STOP_EMULATION     (1 << 31)
+#define FLAG_STOP_EMULATION     (1 << 7)
 
 extern unsigned char    memory[1 << 16];
 
