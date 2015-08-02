@@ -85,8 +85,11 @@ void Z80Reset (Z80_STATE *state)
         state->status = 0;
         AF = 0xffff;
         SP = 0xffff;
-        state->i = state->pc = state->iff1 = state->iff2 = 0;
+        state->i = state->pc = 0;
+#ifdef Z80_INTERRUPT_VALID
+        state->iff1 = state->iff2 = 0;
         state->im = Z80_INTERRUPT_MODE_0;
+#endif
 }
 
 /* Trigger an interrupt according to the current interrupt mode and return the
@@ -95,6 +98,7 @@ void Z80Reset (Z80_STATE *state)
  * data_on_bus must be a single byte opcode.
  */
 
+#ifdef Z80_INTERRUPT_VALID
 uint8_t Z80Interrupt (Z80_STATE *state, int16_t data_on_bus)
 {
         state->status = 0;
@@ -162,6 +166,7 @@ uint8_t Z80NonMaskableInterrupt (Z80_STATE *state)
         
         return 11;
 }
+#endif
 
 /* Emulate a Z80 processor for number_cycles cycles, which must be greater or
  * equal to 4. Return the number of emulated cycles, this number will be equal
@@ -433,7 +438,9 @@ emulate_next_instruction:
                                  * reset. That can never happen here.
                                  */ 
 
+#ifdef Z80_INTERRUPT_VALID
                                 f |= state->iff2 << Z80_P_FLAG_SHIFT;
+#endif
                                 f |= F & Z80_C_FLAG;
 
                                 AF = (a << 8) | f;
@@ -1236,6 +1243,7 @@ emulate_next_instruction:
 
                         case DI: {
 
+#ifdef Z80_INTERRUPT_VALID
                                 state->iff1 = state->iff2 = 0;
 
 #ifdef Z80_CATCH_DI
@@ -1261,11 +1269,13 @@ emulate_next_instruction:
                                 break;
 
 #endif                  
+#endif
 
                         }
 
                         case EI: {
 
+#ifdef Z80_INTERRUPT_VALID
                                 state->iff1 = state->iff2 = 1;
 
 #ifdef Z80_CATCH_EI
@@ -1282,11 +1292,13 @@ emulate_next_instruction:
                                 break;
 
 #endif
+#endif
 
                         }
 
                         case IM_N: {
 
+#ifdef Z80_INTERRUPT_VALID
                                 /* "IM 0/1" (0xed prefixed opcodes 0x4e and
                                  * 0x6e) is treated like a "IM 0".
                                  */
@@ -1304,6 +1316,7 @@ emulate_next_instruction:
                                         state->im = Z80_INTERRUPT_MODE_2;
 
                                 break;
+#endif
 
                         }
 
@@ -2218,7 +2231,9 @@ emulate_next_instruction:
 
                         case RETI_RETN: {
 
+#ifdef Z80_INTERRUPT_INVALID
                                 state->iff1 = state->iff2;
+#endif
                                 POP(pc);        
 
 #if defined(Z80_CATCH_RETI) && defined(Z80_CATCH_RETN)

@@ -162,8 +162,11 @@ extern "C" {
 #define Z80_P_FLAG              Z80_PV_FLAG
 #define Z80_V_FLAG              Z80_PV_FLAG
 
+#define Z80_INTERRUPT_VALID
+
 /* Z80's three interrupt modes. */
 
+#ifdef Z80_INTERRUPT_VALID
 enum {
 
         Z80_INTERRUPT_MODE_0,
@@ -171,6 +174,7 @@ enum {
         Z80_INTERRUPT_MODE_2
 
 };
+#endif
 
 /* Z80 processor's state, you may add additionnal members as necessary. */
 
@@ -187,7 +191,10 @@ typedef struct {
 
         unsigned short  alternates[4];
 
-        uint16_t             i, r, pc, iff1, iff2, im;
+        uint16_t             i, r, pc;
+#ifdef Z80_INTERRUPT_VALID
+        uint16_t             iff1, iff2, im;
+#endif
 
 } Z80_STATE;
 
@@ -294,8 +301,10 @@ typedef struct {
 
 extern void     Z80Reset (Z80_STATE *state);
 
+#ifdef Z80_INTERRUPT_VALID
 extern uint8_t      Z80Interrupt (Z80_STATE *state, int16_t data_on_bus);
 extern uint8_t      Z80NonMaskableInterrupt (Z80_STATE *state);
+#endif
  
 extern uint32_t      Z80Emulate (Z80_STATE *state, uint32_t number_cycles);
 
