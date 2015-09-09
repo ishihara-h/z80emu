@@ -10,22 +10,17 @@
  */
 
 #include <stdio.h>
-#include <stdint.h> 
 #include <stdlib.h> 
+#include "z80emu.h"
 /* #include "monitor.h" */
 
-int dump(x, y)
-{
-	printf("%04x", x);
-        do {
-            if ((x & 7) == 0)
-                printf("\n%04x", x);
-            printf(" %02x", 0);
-            x++;
-        } while (x <= y);
-	printf("\n");
-        return 0;
-}
+#define Z80_CPU_SPEED           4000000   /* In Hz. */
+#define CYCLES_PER_STEP         (Z80_CPU_SPEED / 50)
+#define MAXIMUM_STRING_LENGTH   100
+
+uint8_t memory[1 << 16];
+
+static void dump(uint16_t x, uint16_t y);
 
 int main (void)
 {
@@ -36,6 +31,7 @@ int main (void)
         char c = 0;
         char buf[80];
         char *p;
+        Z80_STATE state;
 
 	while(1) {
 		printf(">");
@@ -44,11 +40,14 @@ int main (void)
 		while (1) {
 			c = *p++;
 			if ((c == '\0') || (c == '\n')) {
-				dump(n1, n2);
-				n1 = n2 + 1;
-				n2 = n1 | 0x07;
-				mode = 0;
+				if (mode == 2) {
+					memory[n1++] = n & 0xff;
+				} else {
+					dump(n1, n2);
+					n1 = n2 + 1;
+					n2 = n1 | 0x07; }
 				n = 0;
+				mode = 0;
 				break;
 			} else if (c == '.') {
 				mode = 1;
@@ -64,17 +63,76 @@ int main (void)
 					n1 = n2 = n;
 				else if (mode == 1)
 					n2 = n;
-				else
-					printf("mode err1\n");
-			} else if (c == ':')
-				;
-			else if (c == 'g')
-				;
-			else
+                                else if (mode != 2)
+					printf("mode err %d\n", mode);
+			} else if (c == ':') {
+				n1 = n;
+                                mode = 2;
+			} else if (c == 'g') {
+				Z80Reset(&state);
+				state.pc = n;
+				for ( ; ; ) {
+					Z80Emulate(&state, CYCLES_PER_STEP);
+					if (state.status & FLAG_STOP_EMULATION)
+						break;
+				}
+				break;
+                        } else if (c == ' ') {
+				if (mode == 2) {
+					memory[n1++] = n & 0xff;
+					n = 0;
+				}	
+			} else
 				printf("err\n");
 		}
 	}
-		return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
+static void dump(uint16_t x, uint16_t y)
+{
+	uint8_t first_f;
 
+	first_f = 1;
+	printf("%04x", x);
+        do {
+            if ((first_f == 0) && ((x & 7) == 0))
+                printf("\n%04x", x);
+            printf(" %02x", memory[x]);
+	    first_f = 0;
+            x++;
+        } while (x <= y);
+	printf("\n");
+}
+
+/* Emulate CP/M bdos call 5 functions 2 (output character on screen) and 9
+ * (output $-terminated string to screen).
+ */
+
+void SystemCall (Z80_STATE *state)
+{
+        if (state->registers.byte[Z80_C] == 2)
+
+                printf("%c", state->registers.byte[Z80_E]);
+
+        else if (state->registers.byte[Z80_C] == 9) {
+
+                int16_t     i, c;
+
+                for (i = state->registers.word[Z80_DE], c = 0; 
+                        memory[i] != '$';
+                        i++) {
+
+                        printf("%c", memory[i & 0xffff]);
+                        if (c++ > MAXIMUM_STRING_LENGTH) {
+
+                                fprintf(stderr,
+                                        "String to print is too long!\n");
+                                exit(EXIT_FAILURE);
+
+                        }
+
+                }
+
+        }
+}
