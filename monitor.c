@@ -12,13 +12,13 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include "z80emu.h"
+#include "monitor.h"
+#include "avrmem.h"
 /* #include "monitor.h" */
 
 #define Z80_CPU_SPEED           4000000   /* In Hz. */
 #define CYCLES_PER_STEP         (Z80_CPU_SPEED / 50)
 #define MAXIMUM_STRING_LENGTH   100
-
-uint8_t memory[1 << 16];
 
 static void dump(uint16_t x, uint16_t y);
 
@@ -41,7 +41,7 @@ int main (void)
 			c = *p++;
 			if ((c == '\0') || (c == '\n')) {
 				if (mode == 2) {
-					memory[n1++] = n & 0xff;
+					memwr(n1++, n & 0xff);
 				} else {
 					dump(n1, n2);
 					n1 = n2 + 1;
@@ -79,7 +79,7 @@ int main (void)
 				break;
                         } else if (c == ' ') {
 				if (mode == 2) {
-					memory[n1++] = n & 0xff;
+					memwr(n1++, n & 0xff);
 					n = 0;
 				}	
 			} else
@@ -98,7 +98,7 @@ static void dump(uint16_t x, uint16_t y)
         do {
             if ((first_f == 0) && ((x & 7) == 0))
                 printf("\n%04x", x);
-            printf(" %02x", memory[x]);
+            printf(" %02x", memrd(x));
 	    first_f = 0;
             x++;
         } while (x <= y);
@@ -120,10 +120,10 @@ void SystemCall (Z80_STATE *state)
                 int16_t     i, c;
 
                 for (i = state->registers.word[Z80_DE], c = 0; 
-                        memory[i] != '$';
+                        memrd(i) != '$';
                         i++) {
 
-                        printf("%c", memory[i & 0xffff]);
+                        printf("%c", memrd(i & 0xffff));
                         if (c++ > MAXIMUM_STRING_LENGTH) {
 
                                 fprintf(stderr,

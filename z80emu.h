@@ -9,6 +9,8 @@
 #ifndef __Z80_INCLUDED__
 
 #include <stdint.h>
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -243,39 +245,40 @@ typedef struct {
  * system calls.
  */
 
-#include "zextest.h"
+/* #include "zextest.h" */
+#define FLAG_STOP_EMULATION	(1 << 7)
 
 #define Z80_FETCH_BYTE(address, x)                                      \
 {                                                                       \
-        (x) = memory[(address) & 0xffff];                               \
+	(x) = memrd((address) & 0xffff);				\
 }
 
 #define Z80_FETCH_WORD(address, x)                                      \
 {                                                                       \
-        (x) = memory[(address) & 0xffff]                                \
-                | (memory[((address) + 1) & 0xffff] << 8);              \
+        (x) = memrd((address) & 0xffff)                                \
+                | (memrd(((address) + 1) & 0xffff) << 8);              \
 }
 
 #define Z80_READ_BYTE(address, x)                                       \
 {                                                                       \
-        (x) = memory[(address) & 0xffff];                               \
+        (x) = memrd((address) & 0xffff);                               \
 }
 
 #define Z80_WRITE_BYTE(address, x)                                      \
 {                                                                       \
-        memory[(address) & 0xffff] = (x);                               \
+        memwr((address) & 0xffff, (x));                               \
 }
 
 #define Z80_READ_WORD(address, x)                                       \
 {                                                                       \
-        (x) = memory[(address) & 0xffff]                                \
-                | (memory[((address) + 1) & 0xffff] << 8);              \
+        (x) = memrd((address) & 0xffff)                                \
+                | (memrd(((address) + 1) & 0xffff) << 8);              \
 }
 
 #define Z80_WRITE_WORD(address, x)                                      \
 {                                                                       \
-        memory[(address) & 0xffff] = x;                                 \
-        memory[((address) + 1) & 0xffff] = x >> 8;                      \
+        memwr((address) & 0xffff, x);                                 \
+        memwr(((address) + 1) & 0xffff, x >> 8);                      \
 }
 
 #define Z80_INPUT_BYTE(port, x)                                         \

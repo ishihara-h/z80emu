@@ -11,6 +11,7 @@
 #include "instructions.h"
 #include "macros.h"
 #include "tables.h"
+#include "avrmem.h"
 
 /* Indirect (HL) or prefixed indexed (IX + d) and (IY + d) memory operands are
  * encoded using the 3 bits "110" (0x06).
