@@ -15,12 +15,15 @@
 #include "monitor.h"
 #include "avrmem.h"
 /* #include "monitor.h" */
+#include "uart.h"
 
 #define Z80_CPU_SPEED           4000000   /* In Hz. */
 #define CYCLES_PER_STEP         (Z80_CPU_SPEED / 50)
 #define MAXIMUM_STRING_LENGTH   100
 
 static void dump(uint16_t x, uint16_t y);
+
+static FILE uart_std = FDEV_SETUP_STREAM(uart_putchar, uart_getchar, _FDEV_SETUP_RW);
 
 int main (void)
 {
@@ -33,6 +36,12 @@ int main (void)
         char *p;
         Z80_STATE state;
 
+	uart_init();
+	stdout = stdin = &uart_std;
+
+        while(1) {
+		printf("0\r\n");
+	}
 	while(1) {
 		printf(">");
 		fgets(buf, sizeof(buf), stdin);
