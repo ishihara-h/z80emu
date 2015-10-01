@@ -16,6 +16,7 @@
 #include "avrmem.h"
 /* #include "monitor.h" */
 #include "uart.h"
+#include <util/delay.h>
 
 #define Z80_CPU_SPEED           4000000   /* In Hz. */
 #define CYCLES_PER_STEP         (Z80_CPU_SPEED / 50)
@@ -39,9 +40,6 @@ int main (void)
 	uart_init();
 	stdout = stdin = &uart_std;
 
-        while(1) {
-		printf("0\r\n");
-	}
 	while(1) {
 		printf(">");
 		fgets(buf, sizeof(buf), stdin);
